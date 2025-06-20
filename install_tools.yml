@@ -21,19 +21,19 @@
         state: present
         update_cache: yes
 
-    - name: Add Kubernetes APT GPG key
-      ansible.builtin.shell: |
+    - name: Add Kubernetes GPG key
+      shell: |
         curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
       args:
         executable: /bin/bash
 
     - name: Add Kubernetes APT repository
-      copy:
-        content: |
-          deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
-        dest: /etc/apt/sources.list.d/kubernetes.list
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+        filename: kubernetes
+        state: present
 
-    - name: Update APT and install Kubernetes components
+    - name: Install kubelet, kubeadm, kubectl
       apt:
         name:
           - kubelet
@@ -42,11 +42,10 @@
         state: present
         update_cache: yes
 
-    - name: Hold kubelet kubeadm kubectl
+    - name: Hold Kubernetes components
       apt:
         name:
           - kubelet
           - kubeadm
           - kubectl
         state: hold
-
