@@ -1,6 +1,8 @@
+---
 - name: Install Docker and Kubernetes
   hosts: web
   become: yes
+
   tasks:
     - name: Install Docker
       apt:
@@ -8,22 +10,38 @@
         state: present
         update_cache: yes
 
-    - name: Install kubeadm, kubelet, kubectl
-      apt:
-        name: "{{ item }}"
+    - name: Add Kubernetes APT key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
         state: present
-      loop:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg
-        - lsb-release
-        - kubelet
-        - kubeadm
-        - kubectl
 
-    - name: Enable Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
+    - name: Add Kubernetes repo
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes
+
+    - name: Install kubelet, kubeadm, and kubectl
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: yes
+
+    - name: Hold Kubernetes packages at current version
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: no
+        allow_unauthenticated: yes
+        force: yes
+        autoremove: no
+        dpkg_options: "force-confdef,force-confold"
+        only_upgrade: no
+        upgrade: no
+
