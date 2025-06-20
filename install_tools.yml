@@ -1,5 +1,5 @@
 ---
-- name: Install Docker and Kubernetes
+- name: Install Docker
   hosts: web
   become: yes
 
@@ -9,42 +9,3 @@
         name: docker.io
         state: present
         update_cache: yes
-
-    - name: Install prerequisites
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-          - lsb-release
-        state: present
-        update_cache: yes
-
-    - name: Add Kubernetes GPG key
-      shell: |
-        curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      args:
-        executable: /bin/bash
-
-    - name: Add Kubernetes APT repository (disable secure check workaround)
-      shell: |
-        echo "deb [trusted=yes] https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-
-    - name: Install kubelet, kubeadm, kubectl
-      apt:
-        name:
-          - kubelet
-          - kubeadm
-          - kubectl
-        state: present
-        update_cache: yes
-
-    - name: Hold Kubernetes components
-      apt:
-        name:
-          - kubelet
-          - kubeadm
-          - kubectl
-        state: hold
-
